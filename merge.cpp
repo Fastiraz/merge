@@ -10,6 +10,9 @@
  ===============================================================================
  */
 
+#define i(x) std::cin >> x;
+#define o(x) std::cout << x;
+
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
@@ -21,21 +24,8 @@
 
 using namespace std;
 
-// The function executed by each thread.
-void merge_files(const vector<string>& files, unordered_set<string>& words) {
-    for (const string& file : files) {
-        ifstream input(file);
-        if (!input) {
-            cerr << "Failed to open file " << file << endl;
-            exit(1);
-        }
-        string word;
-        while (input >> word) {
-            words.insert(word);
-        }
-        input.close();
-    }
-}
+void merge_files(const vector<string>&, unordered_set<string>&);
+void help(string);
 
 int main(int argc, char** argv) {
     // Start measuring time
@@ -47,6 +37,10 @@ int main(int argc, char** argv) {
 
     // Parse command-line arguments
     vector<string> files;
+    if (argc < 2) {
+        help(argv[0]);
+        return 0;
+    }
     for (int i = 1; i < argc; i++) {
         string arg = argv[i];
         if (arg == "-o" || arg == "--output") {
@@ -68,12 +62,7 @@ int main(int argc, char** argv) {
                 exit(1);
             }
         } else if (arg == "-h" || arg == "--help" || arg == "-?") {
-            cout << "Usage: " << argv[0] << " [-o output_file] [-t num_threads] file1 file2 ... fileN" << endl;
-            cout << "Merge multiple word lists into a single output file." << endl;
-            cout << "Options:" << endl;
-            cout << "  -o, --output FILE       Specify output file name. Default is 'output.txt'." << endl;
-            cout << "  -t, --threads NUM       Specify number of threads to use. Default is 4." << endl;
-            cout << "  -h, --help, -?          Display this help message." << endl;
+            help(argv[0]);
             return 0;
         } else {
             files.push_back(arg);
@@ -126,4 +115,29 @@ int main(int argc, char** argv) {
     printf("%d theads used.\n", num_threads);
 
     return 0;
+}
+
+// The function executed by each thread.
+void merge_files(const vector<string>& files, unordered_set<string>& words) {
+    for (const string& file : files) {
+        ifstream input(file);
+        if (!input) {
+            cerr << "Failed to open file " << file << endl;
+            exit(1);
+        }
+        string word;
+        while (input >> word) {
+            words.insert(word);
+        }
+        input.close();
+    }
+}
+
+void help(std::string argv) {
+    o("Usage: " << argv << " [-o output_file] [-t num_threads] file1 file2 ... fileN\n");
+    o("Merge multiple word lists into a single output file.\n");
+    o("Options:\n");
+    o("  -o, --output FILE       Specify output file name. Default is 'output.txt'.\n");
+    o("  -t, --threads NUM       Specify number of threads to use. Default is 4.\n");
+    o("  -h, --help, -?          Display this help message.\n");
 }
